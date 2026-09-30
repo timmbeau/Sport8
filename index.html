@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Sport-Liste</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Sport-Liste">
+<meta name="theme-color" content="#f4f6f3">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<style>
+:root{
+  --bg:#f4f6f3;--card:#fff;--ink:#1d2621;--mute:#6b766f;--line:#dfe5e0;--accent:#1f7a4d;--accent-ink:#fff;
+  --da:#1f9d55;--da-bg:#e3f5ea;--ohne:#d97706;--ohne-bg:#fdf0dc;--krank:#6d4fc2;--krank-bg:#ede8fa;
+  --verl:#d6453d;--verl-bg:#fbe5e3;--fehlt:#56606b;--fehlt-bg:#e7eaee;--warn:#b45309;
+  --r:14px;--safe-b:env(safe-area-inset-bottom);
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#121614;--card:#1b211e;--ink:#e8eee9;--mute:#98a39c;--line:#2c3530;--accent:#3fb87a;--accent-ink:#0d1a12;
+  --da-bg:#173524;--ohne-bg:#3b2a10;--krank-bg:#2a2244;--verl-bg:#3e1c1a;--fehlt-bg:#2a2f35;--da:#46c67e;--ohne:#f0a43a;--krank:#a58cf0;--verl:#f07068;--fehlt:#a3adb8;
+}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);-webkit-user-select:none;user-select:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,textarea,select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;-webkit-user-select:text;user-select:text}
+header{position:sticky;top:0;z-index:5;background:var(--bg);padding:14px 18px 10px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)}
+header h1{font-size:22px;margin:0;flex:1;letter-spacing:-.01em}
+header .sub{font-size:13px;color:var(--mute);font-weight:500}
+.back{font-size:17px;color:var(--accent);font-weight:600;padding:6px 4px}
+select.cls{width:auto;padding:8px 10px;font-weight:600}
+main{padding:14px 18px calc(90px + var(--safe-b));max-width:980px;margin:0 auto}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:var(--safe-b);z-index:6}
+nav.tabs button{flex:1;padding:10px 0 8px;font-size:12px;color:var(--mute);display:flex;flex-direction:column;align-items:center;gap:2px;font-weight:600}
+nav.tabs button span{font-size:22px;line-height:1}
+nav.tabs button.on{color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r)}
+.lessons{display:grid;gap:10px}
+.lesson{display:flex;align-items:center;gap:14px;padding:14px 16px;text-align:left;width:100%}
+.lesson .d{min-width:62px;text-align:center}
+.lesson .d b{display:block;font-size:24px;line-height:1}
+.lesson .d small{color:var(--mute);font-size:12px;text-transform:uppercase;font-weight:600}
+.lesson .mid{flex:1;min-width:0}
+.lesson .t{font-weight:600}
+.lesson .note{color:var(--mute);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lesson.today{border:2px solid var(--accent)}
+.lesson.cancel{opacity:.5}
+.lesson.cancel .t{text-decoration:line-through}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:13px;font-weight:700;padding:3px 8px;border-radius:99px}
+.c-da{background:var(--da-bg);color:var(--da)}.c-ohne{background:var(--ohne-bg);color:var(--ohne)}.c-krank{background:var(--krank-bg);color:var(--krank)}.c-verl{background:var(--verl-bg);color:var(--verl)}.c-fehlt{background:var(--fehlt-bg);color:var(--fehlt)}.c-open{background:var(--bg);color:var(--mute)}
+.month{font-size:13px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.06em;margin:14px 4px 2px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.btn{background:var(--card);border:1px solid var(--line);padding:10px 14px;border-radius:12px;font-weight:600}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.warn{color:var(--verl)}
+.legend{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.rows{display:grid;gap:8px}
+.row{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 14px}
+.row .name{flex:1;min-width:0;font-weight:600;font-size:17px}
+.row .name small{display:block;font-weight:400;color:var(--mute);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .num{color:var(--mute);width:22px;font-size:13px;text-align:right}
+.opts{display:flex;gap:6px}
+.opt{width:64px;height:54px;border-radius:12px;border:2px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:21px;line-height:1;background:var(--card)}
+.opt i{font-style:normal;font-size:10.5px;font-weight:700;margin-top:4px;color:var(--mute)}
+.opt.on.da{background:var(--da-bg);border-color:var(--da)}.opt.on.da i{color:var(--da)}
+.opt.on.ohne{background:var(--ohne-bg);border-color:var(--ohne)}.opt.on.ohne i{color:var(--ohne)}
+.opt.on.krank{background:var(--krank-bg);border-color:var(--krank)}.opt.on.krank i{color:var(--krank)}
+.opt.on.verl{background:var(--verl-bg);border-color:var(--verl)}.opt.on.verl i{color:var(--verl)}
+.opt.on.fehlt{background:var(--fehlt-bg);border-color:var(--fehlt)}.opt.on.fehlt i{color:var(--fehlt)}
+.notebtn{width:40px;height:54px;border-radius:12px;font-size:18px;color:var(--mute)}
+.notebtn.has{color:var(--accent)}
+@media (max-width:700px){.opt{width:48px;height:50px;font-size:19px}.opt i{font-size:9px}.row .name{font-size:15px}.row{flex-wrap:wrap}.row .name{order:1}.notebtn{order:2;height:36px}.opts{order:3;width:100%;justify-content:space-between}.row .num{order:0}.opt{flex:1}}
+.sum{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:15px}
+th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:center}
+th{font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em;position:sticky;top:0;background:var(--card)}
+td.n,th.n{text-align:left;font-weight:600}
+tr.flag td.n::after{content:" ⚠️"}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.grid td{padding:6px 4px;min-width:34px}
+.grid td.n,.grid th.n{width:1%;}
+.grid td.n{position:sticky;left:0;background:var(--card);white-space:nowrap;z-index:1}
+.dot{display:inline-block;width:26px;height:26px;border-radius:8px;line-height:26px;font-size:13px;font-weight:700}
+.hint{color:var(--mute);font-size:14px;margin:8px 2px}
+.box{padding:16px;margin-bottom:14px}
+.box h2{font-size:17px;margin:0 0 10px}
+.box p{margin:6px 0}
+textarea{min-height:260px;font-size:15px;line-height:1.5}
+.field{display:grid;gap:6px;margin:10px 0}
+.field label{font-size:13px;font-weight:600;color:var(--mute)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.toast{position:fixed;left:50%;bottom:calc(84px + var(--safe-b));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+.toast.on{opacity:1}
+.empty{text-align:center;padding:40px 20px;color:var(--mute)}
+.warnbox{background:var(--ohne-bg);color:var(--ink);border:1px solid var(--ohne);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:15px}
+</style>
+</head>
+<body>
+<header id="hdr"></header>
+<main id="main"></main>
+<nav class="tabs" id="tabs">
+  <button data-t="stunden"><span>📅</span>Stunden</button>
+  <button data-t="uebersicht"><span>📊</span>Übersicht</button>
+  <button data-t="einst"><span>⚙️</span>Einstellungen</button>
+</nav>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+/* ---------- Konstanten ---------- */
+const ST={
+  da:{e:"✅",l:"Dabei",k:"c-da"},
+  ohne:{e:"👕",l:"Ohne Sachen",k:"c-ohne"},
+  krank:{e:"🤒",l:"Krank",k:"c-krank"},
+  verl:{e:"🩹",l:"Verletzt",k:"c-verl"},
+  fehlt:{e:"🚫",l:"Abwesend",k:"c-fehlt"}
+};
+const ORDER=["da","ohne","krank","verl","fehlt"];
+// Schulferien + Feiertage Baden-Württemberg 2026/27 (bewegliche Ferientage der Schule unter Einstellungen ergänzen)
+const FERIEN=[["2026-10-26","2026-10-31"],["2026-12-23","2027-01-09"],["2027-03-25","2027-04-03"],["2027-05-18","2027-05-29"],["2027-07-29","2027-09-11"]];
+const FEIERTAGE=["2026-10-03","2026-11-01","2027-05-01","2027-05-06","2027-05-17","2027-05-27"];
+const WT=["So","Mo","Di","Mi","Do","Fr","Sa"];
+const WTL=["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"];
+const MON=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+const KEY="sportliste-v1";
+
+/* ---------- Speicher ---------- */
+let S;
+function uid(){return Math.random().toString(36).slice(2,9)}
+function load(){
+  try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
+  if(!S||!S.classes){
+    S={cur:null,classes:[]};
+    addClass("Sport 8a/8b",4,"2026-09-24","2027-07-28",[]);
+  }
+  // 9a/9b einmalig dazu (auch bei schon eingerichteter App)
+  if(!S.has9){
+    const keep=S.cur;
+    if(!S.classes.some(c=>/9a|9b|9er/i.test(c.name)))addClass("Sport 9a/9b",4,"2026-09-17","2027-07-28",[]);
+    S.has9=true;S.cur=keep||S.cur;save();
+  }
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast("Speichern fehlgeschlagen!")}}
+function addClass(name,wd,start,end,names){
+  const c={id:uid(),name,wd,start,end,students:names.map(n=>({id:uid(),n})),lessons:{},extra:[],frei:[]};
+  S.classes.push(c);S.cur=c.id;save();return c;
+}
+const C=()=>S.classes.find(c=>c.id===S.cur)||S.classes[0];
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
+
+/* ---------- Datum ---------- */
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const parse=s=>{const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
+const todayIso=()=>iso(new Date());
+const fmt=s=>{const d=parse(s);return WT[d.getDay()]+", "+d.getDate()+"."+(d.getMonth()+1)+"."};
+function inFerien(s,c){
+  if(FEIERTAGE.includes(s)||(c.frei||[]).includes(s))return true;
+  return FERIEN.some(([a,b])=>s>=a&&s<=b);
+}
+function dates(c){
+  const out=new Set();
+  let d=parse(c.start);const end=parse(c.end);
+  while(d.getDay()!==Number(c.wd))d.setDate(d.getDate()+1);
+  for(;d<=end;d.setDate(d.getDate()+7)){const s=iso(d);if(!inFerien(s,c))out.add(s)}
+  (c.extra||[]).forEach(s=>out.add(s));
+  Object.keys(c.lessons).forEach(s=>{if(Object.keys(c.lessons[s].e||{}).length)out.add(s)});
+  return [...out].sort();
+}
+const L=(c,d)=>c.lessons[d]||(c.lessons[d]={e:{},note:"",cancel:false});
+
+/* ---------- UI-Helfer ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),1600)}
+function counts(c,d){
+  const r={da:0,ohne:0,krank:0,verl:0,fehlt:0,open:0};const les=c.lessons[d];
+  c.students.forEach(s=>{const v=les&&les.e[s.id]&&les.e[s.id].s;if(v)r[v]++;else r.open++});
+  return r;
+}
+function chipsHtml(r,showOpen){
+  let h="";ORDER.forEach(k=>{if(r[k])h+=`<span class="chip ${ST[k].k}">${ST[k].e} ${r[k]}</span>`});
+  if(showOpen&&r.open)h+=`<span class="chip c-open">offen ${r.open}</span>`;
+  return h;
+}
+let view={t:"stunden",d:null};
+function go(t,d){view={t,d:d||null};render();window.scrollTo(0,0)}
+document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>go(b.dataset.t));
+function classSelect(){
+  if(S.classes.length<2)return `<span class="sub">${esc(C().name)}</span>`;
+  return `<select class="cls" onchange="S.cur=this.value;save();render()">${S.classes.map(c=>`<option value="${c.id}" ${c.id===C().id?"selected":""}>${esc(c.name)}</option>`).join("")}</select>`;
+}
+
+/* ---------- Ansichten ---------- */
+function render(){
+  document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===view.t||(view.t==="stunde"&&b.dataset.t==="stunden")));
+  ({stunden:vStunden,stunde:vStunde,uebersicht:vUeber,einst:vEinst})[view.t]();
+}
+
+function vStunden(){
+  const c=C();
+  $("#hdr").innerHTML=`<h1>Sportstunden</h1>${classSelect()}`;
+  if(!c.students.length){
+    $("#main").innerHTML=`<div class="empty card box"><p style="font-size:40px;margin:0">👥</p><h2>Noch keine Klassenliste</h2><p>Einmal unter Einstellungen die Namen einfügen – dann erscheinen hier alle Stunden.</p><p><button class="btn pri" onclick="go('einst')">Klassenliste eintragen</button></p></div>`;return;
+  }
+  const ds=dates(c),t=todayIso();
+  const next=ds.find(d=>d>=t);
+  let h=`<div class="toolbar"><button class="btn pri" onclick="openToday()">＋ Heute eintragen</button>${next?`<button class="btn" onclick="jump('${next}')">↓ Nächste Stunde</button>`:""}</div>`;
+  h+=`<div class="lessons">`;let lastM="";
+  ds.forEach(d=>{
+    const dt=parse(d),m=MON[dt.getMonth()]+" "+dt.getFullYear();
+    if(m!==lastM){h+=`<div class="month">${m}</div>`;lastM=m}
+    const les=c.lessons[d]||{},r=counts(c,d),done=r.open===0;
+    const past=d<t;
+    h+=`<button id="l-${d}" class="card lesson ${d===t||(d===next&&!ds.includes(t))?"today":""} ${les.cancel?"cancel":""}" onclick="go('stunde','${d}')">
+      <div class="d"><small>${WT[dt.getDay()]}</small><b>${dt.getDate()}.</b><small>${MON[dt.getMonth()].slice(0,3)}</small></div>
+      <div class="mid"><div class="t">${les.cancel?"Fällt aus":d===t?"Heute":d===next?"Nächste Stunde":done?"Eingetragen":past?"Noch nicht eingetragen":"Geplant"}</div>
+      ${les.note?`<div class="note">${esc(les.note)}</div>`:""}
+      <div class="chips" style="margin-top:6px">${les.cancel?"":chipsHtml(r,past||d===t)}</div></div>
+      <div style="color:var(--mute);font-size:22px">›</div></button>`;
+  });
+  h+=`</div><p class="hint">Ferien und Feiertage (BW 2026/27) sind schon rausgenommen. Zusätzliche Stunden oder freie Tage unter Einstellungen.</p>`;
+  $("#main").innerHTML=h;
+  if(next&&!vStunden.done){vStunden.done=1;setTimeout(()=>jump(next,true),50)}
+}
+function jump(d,soft){const e=document.getElementById("l-"+d);if(e)e.scrollIntoView({block:"center",behavior:soft?"auto":"smooth"})}
+function openToday(){
+  const c=C(),t=todayIso();
+  if(!dates(c).includes(t)){c.extra=c.extra||[];c.extra.push(t);save()}
+  go("stunde",t);
+}
+
+function vStunde(){
+  const c=C(),d=view.d,les=L(c,d),dt=parse(d);
+  $("#hdr").innerHTML=`<button class="back" onclick="go('stunden')">‹ Stunden</button><h1>${WTL[dt.getDay()]}, ${dt.getDate()}. ${MON[dt.getMonth()]}</h1><span class="sub">${esc(c.name)}</span>`;
+  let h=`<div class="field" style="margin-top:0"><input id="note" placeholder="Thema / Notiz zur Stunde (z. B. Fußball – Flachpass)" value="${esc(les.note||"")}" onchange="L(C(),'${d}').note=this.value;save()"></div>`;
+  h+=`<div class="toolbar"><button class="btn pri" onclick="restDa()">✅ Rest ist dabei</button><button class="btn" onclick="toggleCancel()">${les.cancel?"↺ Findet doch statt":"✕ Stunde fällt aus"}</button>${(c.extra||[]).includes(d)?`<button class="btn warn" onclick="delExtra()">Stunde löschen</button>`:""}</div>`;
+  if(les.cancel){$("#main").innerHTML=h+`<div class="empty card box">Diese Stunde fällt aus.</div>`;return}
+  h+=`<div class="legend">${ORDER.map(k=>`<span class="chip ${ST[k].k}">${ST[k].e} ${ST[k].l}</span>`).join("")}</div>`;
+  h+=`<div class="sum" id="sum"></div><div class="rows">`;
+  c.students.forEach((s,i)=>{
+    const en=les.e[s.id]||{};
+    const ohne=countFor(c,s.id,"ohne");
+    h+=`<div class="card row" id="r-${s.id}"><span class="num">${i+1}</span>
+      <div class="name">${esc(s.n)}<small id="n-${s.id}">${esc(en.n||"")}${ohne>=3?` ${en.n?"· ":""}⚠️ ${ohne}× ohne Sachen`:""}</small></div>
+      <div class="opts">${ORDER.map(k=>`<button class="opt ${k} ${en.s===k?"on":""}" onclick="setSt('${s.id}','${k}')">${ST[k].e}<i>${ST[k].l.replace("Ohne Sachen","Ohne")}</i></button>`).join("")}</div>
+      <button class="notebtn ${en.n?"has":""}" onclick="setNote('${s.id}')" aria-label="Notiz">✎</button></div>`;
+  });
+  h+=`</div><p class="hint">Nochmal auf den markierten Knopf tippen = Eintrag löschen. ✎ = Notiz (z. B. „Attest bis 15.10.“).</p>`;
+  $("#main").innerHTML=h;updSum();
+}
+function updSum(){const e=$("#sum");if(e)e.innerHTML=chipsHtml(counts(C(),view.d),true)}
+function setSt(sid,k){
+  const c=C(),les=L(c,view.d),en=les.e[sid]||(les.e[sid]={});
+  en.s=en.s===k?undefined:k;if(!en.s&&!en.n)delete les.e[sid];
+  save();
+  const row=document.getElementById("r-"+sid);
+  row.querySelectorAll(".opt").forEach(b=>b.classList.toggle("on",b.classList.contains(en.s||"-")));
+  updSum();
+  if(k==="ohne"&&en.s==="ohne"){const n=countFor(c,sid,"ohne");if(n>=3)toast(`⚠️ ${n}× ohne Sachen – Eltern informieren?`)}
+}
+function setNote(sid){
+  const c=C(),les=L(c,view.d),en=les.e[sid]||{};
+  const v=prompt("Notiz für "+c.students.find(s=>s.id===sid).n+":",en.n||"");
+  if(v===null)return;
+  en.n=v.trim();les.e[sid]=en;if(!en.s&&!en.n)delete les.e[sid];save();render();
+}
+function restDa(){
+  const c=C(),les=L(c,view.d);let n=0;
+  c.students.forEach(s=>{const en=les.e[s.id]||(les.e[s.id]={});if(!en.s){en.s="da";n++}});
+  save();render();toast(n?`${n}× auf „Dabei“ gesetzt`:"Alle schon eingetragen");
+}
+function toggleCancel(){const les=L(C(),view.d);les.cancel=!les.cancel;save();render()}
+function delExtra(){
+  const c=C();if(!confirm("Diese zusätzliche Stunde samt Einträgen löschen?"))return;
+  c.extra=c.extra.filter(x=>x!==view.d);delete c.lessons[view.d];save();go("stunden");
+}
+function countFor(c,sid,k){let n=0;Object.values(c.lessons).forEach(l=>{if(!l.cancel&&l.e[sid]&&l.e[sid].s===k)n++});return n}
+
+function vUeber(){
+  const c=C();
+  $("#hdr").innerHTML=`<h1>Übersicht</h1>${classSelect()}`;
+  if(!c.students.length){$("#main").innerHTML=`<div class="empty">Noch keine Klassenliste.</div>`;return}
+  const ds=dates(c).filter(d=>{const l=c.lessons[d];return l&&!l.cancel&&Object.keys(l.e).length});
+  const flagged=c.students.filter(s=>countFor(c,s.id,"ohne")>=3);
+  let h="";
+  if(flagged.length)h+=`<div class="warnbox">⚠️ <b>3× oder öfter ohne Sportsachen:</b> ${flagged.map(s=>esc(s.n)).join(", ")} – Eltern informieren.</div>`;
+  h+=`<div class="card" style="padding:4px 8px 8px;margin-bottom:16px"><div class="scroll"><table><thead><tr><th class="n">Name</th>${ORDER.map(k=>`<th>${ST[k].e}<br>${ST[k].l.replace("Ohne Sachen","Ohne")}</th>`).join("")}</tr></thead><tbody>`;
+  c.students.forEach(s=>{
+    const o=countFor(c,s.id,"ohne");
+    h+=`<tr class="${o>=3?"flag":""}"><td class="n">${esc(s.n)}</td>${ORDER.map(k=>{const n=countFor(c,s.id,k);return `<td>${n?`<span class="chip ${ST[k].k}">${n}</span>`:`<span style="color:var(--line)">–</span>`}</td>`}).join("")}</tr>`;
+  });
+  h+=`</tbody></table></div></div>`;
+  h+=`<h2 style="font-size:17px;margin:4px 2px 8px">Alle Stunden im Raster</h2>`;
+  if(!ds.length)h+=`<p class="hint">Noch keine Einträge.</p>`;
+  else{
+    h+=`<div class="card grid" style="padding:4px"><div class="scroll"><table><thead><tr><th class="n" style="left:0;z-index:2">Name</th>${ds.map(d=>{const x=parse(d);return `<th onclick="go('stunde','${d}')">${x.getDate()}.${x.getMonth()+1}.</th>`}).join("")}</tr></thead><tbody>`;
+    c.students.forEach(s=>{
+      h+=`<tr><td class="n">${esc(s.n)}</td>${ds.map(d=>{const en=c.lessons[d].e[s.id];const k=en&&en.s;return `<td>${k?`<span class="dot ${ST[k].k}" title="${ST[k].l}">${ST[k].e}</span>`:""}</td>`}).join("")}</tr>`;
+    });
+    h+=`</tbody></table></div></div>`;
+  }
+  $("#main").innerHTML=h;
+}
+
+function vEinst(){
+  const c=C();
+  $("#hdr").innerHTML=`<h1>Einstellungen</h1>${classSelect()}`;
+  let h=`<div class="card box"><h2>Klassenliste ${esc(c.name)}</h2>
+    <p class="hint" style="margin-top:0">Ein Name pro Zeile – z. B. aus der Schulliste kopieren und einfügen. Umbenennen behält alle Einträge.</p>
+    <textarea id="names" placeholder="Nachname Vorname&#10;Nachname Vorname&#10;…">${esc(c.students.map(s=>s.n).join("\n"))}</textarea>
+    <p><button class="btn pri" onclick="saveNames()">Klassenliste speichern</button> <span class="hint">${c.students.length} Schüler</span></p></div>`;
+  h+=`<div class="card box"><h2>Stundenplan</h2>
+    <div class="field"><label>Klassenname</label><input id="cname" value="${esc(c.name)}"></div>
+    <div class="two"><div class="field"><label>Wochentag</label><select id="wd">${[1,2,3,4,5].map(i=>`<option value="${i}" ${Number(c.wd)===i?"selected":""}>${WTL[i]}</option>`).join("")}</select></div>
+    <div class="field"><label>&nbsp;</label><span></span></div>
+    <div class="field"><label>Erste Stunde ab</label><input type="date" id="st" value="${c.start}"></div>
+    <div class="field"><label>Bis</label><input type="date" id="en" value="${c.end}"></div></div>
+    <p><button class="btn pri" onclick="savePlan()">Speichern</button></p></div>`;
+  h+=`<div class="card box"><h2>Zusätzliche Stunde / freier Tag</h2>
+    <div class="two"><div class="field"><label>Datum</label><input type="date" id="xd" value="${todayIso()}"></div><div class="field"><label>&nbsp;</label><span></span></div></div>
+    <p><button class="btn" onclick="addExtra()">＋ Als Sportstunde hinzufügen</button> <button class="btn" onclick="addFrei()">Als freien Tag markieren</button></p>
+    ${(c.frei||[]).length?`<p class="hint">Freie Tage: ${c.frei.map(d=>`${fmt(d)} <button class="back" style="font-size:14px" onclick="delFrei('${d}')">✕</button>`).join(" · ")}</p>`:""}</div>`;
+  h+=`<div class="card box"><h2>Weitere Klasse</h2><p class="hint" style="margin-top:0">Für z. B. Sport 9a/9b – oben rechts kann man dann zwischen den Klassen wechseln.</p>
+    <div class="two"><div class="field"><label>Name</label><input id="nc" placeholder="Sport 9a/9b"></div><div class="field"><label>Wochentag</label><select id="nwd">${[1,2,3,4,5].map(i=>`<option value="${i}" ${i===4?"selected":""}>${WTL[i]}</option>`).join("")}</select></div></div>
+    <p><button class="btn" onclick="newClass()">＋ Klasse anlegen</button> ${S.classes.length>1?`<button class="btn warn" onclick="delClass()">Diese Klasse löschen</button>`:""}</p></div>`;
+  h+=`<div class="card box"><h2>Sichern</h2>
+    <p class="hint" style="margin-top:0">Alles wird nur auf diesem iPad gespeichert – nichts geht ins Internet. Ab und zu eine Sicherung machen (z. B. in „Dateien“ ablegen).</p>
+    <p><button class="btn" onclick="exportJson()">⬇︎ Sicherung speichern</button> <button class="btn" onclick="exportCsv()">⬇︎ Tabelle (CSV) für Excel</button> <button class="btn" onclick="$('#imp').click()">⬆︎ Sicherung laden</button></p>
+    <input type="file" id="imp" accept=".json,application/json" style="display:none" onchange="importJson(this.files[0])"></div>`;
+  $("#main").innerHTML=h;
+}
+function saveNames(){
+  const c=C(),lines=$("#names").value.split(/\n/).map(x=>x.replace(/^\s*\d+[.)]\s*/,"").trim()).filter(Boolean);
+  const old=c.students;
+  const next=lines.map((n,i)=>{const same=old.find(s=>s.n===n);if(same)return same;
+    // Umbenennen: gleiche Position und Name ist nicht mehr vorhanden
+    const pos=old[i];if(pos&&!lines.includes(pos.n)&&!next_used.has(pos.id)){next_used.add(pos.id);return {id:pos.id,n}}
+    return {id:uid(),n}});
+  c.students=next;next_used.clear();save();toast(`${next.length} Schüler gespeichert`);render();
+}
+const next_used=new Set();
+function savePlan(){const c=C();c.name=$("#cname").value.trim()||c.name;c.wd=Number($("#wd").value);c.start=$("#st").value||c.start;c.end=$("#en").value||c.end;save();toast("Gespeichert");render()}
+function addExtra(){const c=C(),d=$("#xd").value;if(!d)return;c.extra=c.extra||[];if(!c.extra.includes(d))c.extra.push(d);c.frei=(c.frei||[]).filter(x=>x!==d);save();toast("Stunde am "+fmt(d)+" hinzugefügt");render()}
+function addFrei(){const c=C(),d=$("#xd").value;if(!d)return;c.frei=c.frei||[];if(!c.frei.includes(d))c.frei.push(d);c.extra=(c.extra||[]).filter(x=>x!==d);save();toast(fmt(d)+" ist frei");render()}
+function delFrei(d){const c=C();c.frei=c.frei.filter(x=>x!==d);save();render()}
+function newClass(){const n=$("#nc").value.trim();if(!n){toast("Bitte Namen eingeben");return}addClass(n,Number($("#nwd").value),C().start,C().end,[]);toast(n+" angelegt");render()}
+function delClass(){const c=C();if(!confirm(`„${c.name}“ mit allen Einträgen löschen?`))return;S.classes=S.classes.filter(x=>x.id!==c.id);S.cur=S.classes[0].id;save();render()}
+async function share(name,text,type){
+  const blob=new Blob([text],{type});
+  const file=new File([blob],name,{type});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file]});return}catch(e){if(e.name==="AbortError")return}}
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();
+}
+function stamp(){return todayIso()}
+function exportJson(){share(`Sportliste-Sicherung-${stamp()}.json`,JSON.stringify(S,null,1),"application/json")}
+function exportCsv(){
+  const c=C(),ds=dates(c).filter(d=>c.lessons[d]&&!c.lessons[d].cancel&&Object.keys(c.lessons[d].e).length);
+  const q=v=>`"${String(v).replace(/"/g,'""')}"`;
+  let rows=[["Name",...ds.map(fmt),...ORDER.map(k=>ST[k].l+" gesamt")]];
+  c.students.forEach(s=>rows.push([s.n,...ds.map(d=>{const e=c.lessons[d].e[s.id];return e?(e.s?ST[e.s].l:"")+(e.n?" ("+e.n+")":""):""}),...ORDER.map(k=>countFor(c,s.id,k))]));
+  share(`${c.name.replace(/[^\wäöüÄÖÜß-]+/g,"_")}-${stamp()}.csv`,"﻿"+rows.map(r=>r.map(q).join(";")).join("\n"),"text/csv");
+}
+function importJson(f){
+  if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const x=JSON.parse(r.result);if(!x.classes)throw 0;if(!confirm("Sicherung laden? Die aktuellen Daten werden ersetzt."))return;S=x;save();toast("Sicherung geladen");go("stunden")}catch(e){toast("Keine gültige Sicherung")}};
+  r.readAsText(f);
+}
+
+load();render();
+if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
